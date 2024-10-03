@@ -3,26 +3,27 @@ import random
 import os
 import requests
 
-# スコア送信関数
 def send_score(player_name, score):
     url = 'https://scores.shieru-lab.com/'  # データを送信するURL
     data = {
-        'player_name': player_name,
-        'score': score
+        'name': player_name,
+        'score': score,
+        'type': "SHOOTING", 
+        'metadata': {}  # メタデータは空の辞書で送信
     }
 
     print(f"送信するデータ: {data}")  # デバッグメッセージを追加
-    
+
     try:
         # POSTリクエストでデータを送信
-        response = requests.post(url, data=data)
-        
+        response = requests.post(url, json=data)  # JSON形式で送信
+
         # 成功メッセージの表示
         if response.status_code == 200:
             print(f"スコアが正常に送信されました: {response.text}")
         else:
-            print(f"スコア送信に失敗しました: {response.status_code}")
-    
+            print(f"スコア送信に失敗しました: {response.status_code} - {response.text}")
+
     except requests.exceptions.RequestException as e:
         print(f"エラーが発生しました: {e}")
 
@@ -203,14 +204,18 @@ def gamestage():
     text = font.render("SCORE: " + str(score), True, pg.Color("WHITE"))
     screen.blit(text, (20, 20))
 
+# グローバル変数を追加
+score_sent = False  # スコアが送信されたかどうかのフラグ
+
 # ゲームクリア画面を表示する関数
 def congratulations():
+    global score, page, score_sent
     screen.fill(pg.Color("NAVY"))
 
-    # スコアを送信
-    send_score(player_name, score)  # プレイヤー名とスコアを送信
-
-    screen.fill(pg.Color("NAVY"))
+     # スコアを送信（まだ送信されていない場合）
+    if not score_sent:
+        send_score(player_name, score)  # プレイヤー名とスコアを送信
+        score_sent = True  # スコアが送信されたことを記録
     
     # 背景画像の表示
     congrats_img = load_image("images/Congratulations.png", (886, 600))
@@ -253,13 +258,14 @@ def gamereset():
 
 # ゲームオーバー
 def gameover():
+    global score, page, score_sent
     screen.fill(pg.Color("NAVY"))
 
-    # スコアを送信
-    send_score(player_name, score)  # プレイヤー名とスコアを送信
+     # スコアを送信（まだ送信されていない場合）
+    if not score_sent:
+        send_score(player_name, score)  # プレイヤー名とスコアを送信
+        score_sent = True  # スコアが送信されたことを記録
 
-    screen.fill(pg.Color("NAVY"))
-    
     # GAMEOVERのテキスト表示
     font = pg.font.Font(None, 150)
     text = font.render("GAMEOVER", True, pg.Color("RED"))
