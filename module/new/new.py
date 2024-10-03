@@ -1,6 +1,30 @@
 import pygame as pg, sys
 import random
 import os
+import requests
+
+# スコア送信関数
+def send_score(player_name, score):
+    url = 'https://scores.shieru-lab.com/'  # データを送信するURL
+    data = {
+        'player_name': player_name,
+        'score': score
+    }
+
+    print(f"送信するデータ: {data}")  # デバッグメッセージを追加
+    
+    try:
+        # POSTリクエストでデータを送信
+        response = requests.post(url, data=data)
+        
+        # 成功メッセージの表示
+        if response.status_code == 200:
+            print(f"スコアが正常に送信されました: {response.text}")
+        else:
+            print(f"スコア送信に失敗しました: {response.status_code}")
+    
+    except requests.exceptions.RequestException as e:
+        print(f"エラーが発生しました: {e}")
 
 # プレイヤー名の入力
 player_name = input("プレイヤー名を入力してください: ")
@@ -182,6 +206,11 @@ def gamestage():
 # ゲームクリア画面を表示する関数
 def congratulations():
     screen.fill(pg.Color("NAVY"))
+
+    # スコアを送信
+    send_score(player_name, score)  # プレイヤー名とスコアを送信
+
+    screen.fill(pg.Color("NAVY"))
     
     # 背景画像の表示
     congrats_img = load_image("images/Congratulations.png", (886, 600))
@@ -224,6 +253,11 @@ def gamereset():
 
 # ゲームオーバー
 def gameover():
+    screen.fill(pg.Color("NAVY"))
+
+    # スコアを送信
+    send_score(player_name, score)  # プレイヤー名とスコアを送信
+
     screen.fill(pg.Color("NAVY"))
     
     # GAMEOVERのテキスト表示
